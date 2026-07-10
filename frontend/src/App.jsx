@@ -1,21 +1,26 @@
 import DashboardCards from "./components/DashboardCards";
+import Navbar from "./components/Navbar";
+import AlertsTable from "./components/AlertsTable";
+import Sidebar from "./components/Sidebar";
+
 
 
 function App() {
   return (
-    <div>
-      <header
-        style={{
-          backgroundColor: "#1f2937",
-          color: "white",
-          padding: "20px",
-          textAlign: "center",
-        }}
-        >
-         <h1> AlertifyOps Dashboard </h1>
-         </header>
+
+    <div style = {{ display: "flex" }}>
+
+      <Sidebar />
+
+      <div style = {{ flex: 1 }}>  
+
+         <Navbar />
 
          <DashboardCards />
+         
+         <AlertsTable />
+
+         </div>
          </div>
   );
 }
