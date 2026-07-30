@@ -9,7 +9,7 @@ class Alert(BaseModel):
     
     
 @router.post("/alerts")
-def create_Alert(alert: Alert):
+def create_alert(alert: Alert):
     return {
         "message": "Alert received successfully",
         "alert": alert  

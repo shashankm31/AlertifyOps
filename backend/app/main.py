@@ -1,9 +1,14 @@
 from fastapi import FastAPI
 from app.api.alerts import router
 
+from app.database.database import Base, engine
+from app.models.alerts import Alert
+
     
 # Create FastAPI appliocation   
 app = FastAPI()
+
+Base.metadata.create_all(bind = engine)
 
 app.include_router(router)
 
