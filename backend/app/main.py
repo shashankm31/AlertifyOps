@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from app.api.alerts import router
+from app.api.alert_routes import router
 
 from app.database.database import Base, engine
-from app.models.alerts import Alert
+from app.models.alert_model import Alert
 
     
 # Create FastAPI appliocation   

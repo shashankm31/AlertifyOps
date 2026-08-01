@@ -12,3 +12,11 @@ SessionLocal = sessionmaker(bind = engine)    # Session is a temporary workspace
 db = SessionLocal()
 
 Base = declarative_base()    # Declarative_base() is a fucntion so returns a Class. Not an object. 
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
