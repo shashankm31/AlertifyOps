@@ -31,4 +31,37 @@ def get_alerts(
     return alerts
 
 
+@router.put("/alerts/{alert_id}", response_model = AlertResponse)
+def update_alert(
+    alert_id: int,
+    alert: AlertCreate,
+    db: Session = Depends(get_db)
+):
+    db_alert = db.query(Alert).filter(Alert.id == alert_id).first()
     
+    if db_alert is None:
+        return {"message": "Alert not found"}
+    
+    db_alert.device = alert.device
+    db_alert.status = alert.status
+    
+    db.commit()
+    db.refresh(db_alert)
+    
+    return db_alert
+
+
+@router.delete("/alerts/{alert_id}")
+def delete_alert(
+    alert_id: int,
+    db: Session = Depends(get_db)
+):
+    db_alert = db.query(Alert).filter(Alert.id == alert_id).first()
+    
+    if db_alert is None:
+        return {"message": "Alert not found"}
+    
+    db.delete(db_alert)
+    db.commit()
+    
+    return {"message": "Alert deleted successfully"}
