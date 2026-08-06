@@ -1,0 +1,248 @@
+# Backend Architecture
+
+## Overview
+
+The AlertifyOps backend follows a layered architecture to separate responsibilities and improve maintainability.
+
+Each layer performs a specific task before passing the request to the next layer.
+
+-----
+
+# Request Flow
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Layer Explaination
+
+## 1. Client
+
+The client sends an HTTP request to the backend.
+
+Examples:
+
+- Web UI
+- Swagger UI
+- Postman
+- Mobile Application
+- Monitoring Tools 
+
+Example:
+
+POST /Alerts
+
+-----
+
+## 2. FastAPI Application
+
+The FastAPI application receives the incoming HTTP request.
+The application is initialized in:
+
+main.py
+
+Responsibilities:
+
+- Start the application
+- Register API routers
+- Create database tables
+- Handle incoming requests
+
+-----
+
+## 3. API Router
+
+The router maps the incoming request to the correct function.
+
+Example:
+
+POST /alerts
+
+|
+
+create_alert()
+
+Responsibilities:
+
+- Receive request
+- Call required services
+- Return response
+
+Current Router:
+
+alert_routes.py
+
+-----
+
+## 4. Schema Validation
+
+Incoming request data is validated using Pydantic schemas.
+
+Current Schemas
+
+AlertCreate
+
+Used for validating incoming request data.
+
+AlertResponse
+
+Used for formatting outgoing responses.
+
+Benefits:
+
+- Prevent invalid data
+- Automatic type validation
+- API documentation generation
+
+## 5. Business Logic
+
+Business logic contains the application's core functionality.
+
+Currently:
+
+CRUD operations are implemented directly inside the API routes.
+
+Future:
+
+Business logic will be moved into the services layer.
+
+Examples:
+
+- Alert Validation
+- Duplicate Detection
+- Incident Creation
+- Notification Engine
+
+-----
+
+## 6. Database Model
+
+Models represent database tables.
+
+Current Model
+
+Alert 
+
+Responsibilities
+
+- Define table structure
+- Map Python objects to database rows
+
+The backend uses SQLAlchemy ORM for database interaction.
+
+-----
+
+## 7. Database
+
+Current Database
+
+SQLite
+
+Responsibilities
+
+- Store alert records
+- Retrieve alert information
+- Update existing alerts
+- Delete alerts
+
+Future database
+
+PostgreSQL
+
+-----
+
+# CRUD Operations
+
+Currently implemented APIs
+
+POST /alerts
+
+Create a new alert.
+
+GET /alerts
+
+Retrieve all alerts.
+
+PUT /alerts/{id}
+
+Update an existing alert.
+
+DELETE /alerts/{id}
+
+Delete an alert.
+
+-----
+
+# Current Backend Flow
+
+Example:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Benefits of Layered Architecture
+
+- Easier maintenance
+- Reusable code
+- Better scalability
+- Production-ready project structure
+
+# Current Status 
+
+Completed
+
+FastAPI
+SQLAlchemy
+SQLite
+CRUD APIs
+Swagger UI
+
+Upcoming:
+
+- PostgreSQL
+- Authentication
+- Docker
+- Kubernetes
+- AWS Deployment
+
