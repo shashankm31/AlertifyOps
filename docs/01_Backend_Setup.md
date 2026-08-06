@@ -16,14 +16,17 @@ This backend will later be containerized using Docker and deployed to Kubernetes
 
 # Project Structure
 
-
-
-
-
-
-
-
-
+backend/
+│
+├── app/
+│   ├── api/
+│   ├── database/
+│   ├── models/
+│   ├── schemas/
+│   ├── services/
+│   └── main.py
+│
+└── requirements.txt
 
 # Folder Explanation
 
@@ -73,9 +76,11 @@ Each object created from the Alert model corresponds to one database row.
 
 Example:
 
+Alert Model
 
+↓
 
-
+alerts table
 
 -----
 
@@ -117,7 +122,6 @@ later it will contain:
 
 This keeps API routes clean.
 
-
 ## main.py
 
 Entry point of the FastAPI application.
@@ -133,15 +137,35 @@ Responsibilities:
 
 # Backend Request Flow
 
+Client
 
+↓
 
+FastAPI
 
+↓
 
+Router
 
+↓
 
+Schema Validation
 
+↓
 
+Business Logic
 
+↓
+
+SQLAlchemy
+
+↓
+
+Database
+
+↓
+
+Response
 
 # Current Features
 

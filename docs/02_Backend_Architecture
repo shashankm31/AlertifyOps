@@ -10,32 +10,35 @@ Each layer performs a specific task before passing the request to the next layer
 
 # Request Flow
 
+Client
 
+↓
 
+FastAPI Application
 
+↓
 
+API Router
 
+↓
 
+Schema Validation
 
+↓
 
+Business Logic
 
+↓
 
+Database Model
 
+↓
 
+Database
 
+↓
 
-
-
-
-
-
-
-
-
-
-
-
-
+Response
 
 # Layer Explaination
 
@@ -81,7 +84,7 @@ Example:
 
 POST /alerts
 
-|
+↓
 
 create_alert()
 
@@ -200,26 +203,39 @@ Delete an alert.
 
 Example:
 
+Client sends:
 
+POST /alerts
 
+↓
 
+FastAPI receives request
 
+↓
 
+Router executes create_alert()
 
+↓
 
+AlertCreate validates request
 
+↓
 
+Alert model is created
 
+↓
 
+SQLAlchemy inserts record
 
+↓
 
+SQLite stores record
 
+↓
 
+Response returned
 
-
-
-
-
+-----
 
 # Benefits of Layered Architecture
 
