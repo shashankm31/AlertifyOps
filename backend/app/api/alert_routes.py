@@ -5,7 +5,6 @@ from app.schemas.alert_schema import AlertCreate, AlertResponse
 from app.database.database import get_db
 from app.models.alert_model import Alert
 
-
 router = APIRouter()
 
 @router.post("/alerts", response_model = AlertResponse)
@@ -22,6 +21,7 @@ def create_alert(
     db.refresh(db_alert)
     
     return db_alert
+
 
 @router.get("/alerts", response_model = list[AlertResponse])
 def get_alerts(
@@ -65,3 +65,24 @@ def delete_alert(
     db.commit()
     
     return {"message": "Alert deleted successfully"}
+
+
+@router.post("/register", response_model = UserResponse)
+def register_user(
+    user: UserCreate,
+    db: Session = Depends(get_db)
+):
+    
+    hashed_password = hash_password(user.password)
+    
+    db_user = User(
+        username = user.username,
+        email = user.email,
+        password = hashed_password
+    )
+    
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    
+    return db_user
