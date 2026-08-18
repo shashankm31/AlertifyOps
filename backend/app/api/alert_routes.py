@@ -66,23 +66,3 @@ def delete_alert(
     
     return {"message": "Alert deleted successfully"}
 
-
-@router.post("/register", response_model = UserResponse)
-def register_user(
-    user: UserCreate,
-    db: Session = Depends(get_db)
-):
-    
-    hashed_password = hash_password(user.password)
-    
-    db_user = User(
-        username = user.username,
-        email = user.email,
-        password = hashed_password
-    )
-    
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    
-    return db_user
