@@ -44,10 +44,10 @@ def login_user(
     db_user = db.query(User).filter(User.email == user.email).first()
     
     if not db_user:
-        raise HTTPException(status_code = 401, detail = "Invalid email or password")
+        raise HTTPException(status_code = 401, detail = "User not found")
     
     if not verify_password(user.password, db_user.password):
-        raise HTTPException(status_code = 401, detail = "Invalid email or password")
+        raise HTTPException(status_code = 401, detail = "Password incorrect")
     
     return {
         "message": "Login successful",
