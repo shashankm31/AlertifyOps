@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.user_model import User
 from app.schemas.user_schema import UserCreate, UserLogin, UserResponse
-from app.core.security import hash_password, verify_password
+from app.core.security import hash_password, verify_password, create_access_token
 from fastapi import HTTPException
 
 
@@ -49,8 +49,11 @@ def login_user(
     if not verify_password(user.password, db_user.password):
         raise HTTPException(status_code = 401, detail = "Password incorrect")
     
+    access_token = create_access_token({
+        "sub": str(db_user.id)
+    })
+    
     return {
-        "message": "Login successful",
-        "username": db_user.username,
-        "email": db_user.email
+        "access_token": access_token,
+        "token_type": "bearer"
     }
