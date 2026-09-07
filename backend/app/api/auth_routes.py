@@ -4,8 +4,11 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.user_model import User
 from app.schemas.user_schema import UserCreate, UserLogin, UserResponse
-from app.core.security import hash_password, verify_password, create_access_token
+from app.core.security import hash_password, verify_password, create_access_token, get_current_user
 from fastapi import HTTPException
+from fastapi import Depends
+from fastapi.security import OAuth2PasswordRequestForm
+
 
 
 router = APIRouter(
@@ -37,11 +40,11 @@ def register_user(
 
 @router.post("/login")
 def login_user(
-    user: UserLogin,
+    user: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
     
-    db_user = db.query(User).filter(User.email == user.email).first()
+    db_user = db.query(User).filter(User.email == user.username).first()
     
     if not db_user:
         raise HTTPException(status_code = 401, detail = "User not found")
@@ -57,3 +60,14 @@ def login_user(
         "access_token": access_token,
         "token_type": "bearer"
     }
+    
+#Temporary Endpoint
+
+@router.get("/test-auth")
+def test_auth(current_user: dict = Depends(get_current_user)):
+    return {
+        "message": "Authentication successful",
+        "user": current_user
+    }
+
+

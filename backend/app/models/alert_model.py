@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
 from app.database.database import Base
 
 class Alert(Base):
@@ -7,5 +7,10 @@ class Alert(Base):
     
     id = Column(Integer, primary_key = True)
     
-    device = Column(String, nullable = False)
-    status = Column(String, nullable = False)
+    device = Column(String, nullable = False)     #Router-01
+    source = Column(String, nullable = False)     #SolarWinds
+    alert_type = Column(String, nullable = False) #Interface Down
+    severity = Column(String, nullable = False)   #Critical
+    message = Column(String, nullable = False)    #GigabitEthernet0/1 is down
+    status = Column(String, nullable = False)     #Open
+    timestamp = Column(DateTime, nullable = False)  #When alert occurred
