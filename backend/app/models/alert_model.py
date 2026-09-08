@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from app.database.database import Base
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 
 class Alert(Base):
     
@@ -14,3 +15,4 @@ class Alert(Base):
     message = Column(String, nullable = False)    #GigabitEthernet0/1 is down
     status = Column(String, nullable = False)     #Open
     timestamp = Column(DateTime, nullable = False)  #When alert occurred
+    incident_id = Column(Integer, ForeignKey("incidents.id"), nullable=True)  #Foreign key to incidents table

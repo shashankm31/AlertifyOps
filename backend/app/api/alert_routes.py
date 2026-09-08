@@ -6,6 +6,9 @@ from app.database.database import get_db
 from app.models.alert_model import Alert
 from app.core.security import get_current_user
 from app.integrations.solarwinds import normalize_solarwinds_alert
+from app.services.alert_deduplication import is_duplicate
+from app.services.alert_correlation import find_related_incident
+from app.models.incident_model import Incident
 
 router = APIRouter()
 
@@ -37,6 +40,35 @@ def solarwinds_webhook(
     db: Session = Depends(get_db)
 ):
     normalized_alert = normalize_solarwinds_alert(payload)
+    related_incident = find_related_incident(db, normalized_alert)
+    
+    if not related_incident:
+        new_incident = Incident(
+            title = f"{normalized_alert['device']} issue",
+            severity = normalized_alert["severity"],
+            status = "Open",
+            device = normalized_alert["device"],
+            created_at = normalized_alert["timestamp"]
+        )
+        db.add(new_incident)
+        db.commit()
+        db.refresh(new_incident)
+        
+        related_incident = new_incident
+    
+    normalized_alert["incident_id"] = related_incident.id
+    
+    existing_alert = db.query(Alert).filter(
+        Alert.device == normalized_alert["device"],
+        Alert.alert_type == normalized_alert["alert_type"],
+        Alert.status == normalized_alert["status"]
+    ).first()
+    
+    if existing_alert:
+        return {
+            "message": "Duplicate alert detected",
+            "alert_id": existing_alert.id    
+        }
     
     db_alert = Alert(**normalized_alert)
     
