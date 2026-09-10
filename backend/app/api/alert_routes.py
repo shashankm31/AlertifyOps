@@ -39,9 +39,27 @@ def solarwinds_webhook(
     payload: dict,
     db: Session = Depends(get_db)
 ):
+    
+    # 1. Normalize Solarwinds alert
     normalized_alert = normalize_solarwinds_alert(payload)
+    
+    #2. Check for duplicate alert
+    existing_alert = db.query(Alert).filter(
+        Alert.device == normalized_alert["device"],
+        Alert.alert_type == normalized_alert["alert_type"],
+        Alert.status == normalized_alert["status"]
+    ).first()
+    
+    if existing_alert:
+            return {
+                "message": "Duplicate alert detected",
+                "alert_id": existing_alert.id 
+            }
+    
+    #3. Find an existing open incident for this device
     related_incident = find_related_incident(db, normalized_alert)
     
+    #4. Create a new incident if none exists
     if not related_incident:
         new_incident = Incident(
             title = f"{normalized_alert['device']} issue",
@@ -55,22 +73,21 @@ def solarwinds_webhook(
         db.refresh(new_incident)
         
         related_incident = new_incident
-    
+        
+    #5. Connect the alert to the incident
     normalized_alert["incident_id"] = related_incident.id
     
-    existing_alert = db.query(Alert).filter(
-        Alert.device == normalized_alert["device"],
-        Alert.alert_type == normalized_alert["alert_type"],
-        Alert.status == normalized_alert["status"]
-    ).first()
-    
-    if existing_alert:
-        return {
-            "message": "Duplicate alert detected",
-            "alert_id": existing_alert.id    
-        }
-    
-    db_alert = Alert(**normalized_alert)
+    #6. Save the alert
+    db_alert = Alert(
+        source = normalized_alert["source"],
+        device = normalized_alert["device"],
+        alert_type = normalized_alert["alert_type"],
+        severity = normalized_alert["severity"],
+        message = normalized_alert["message"],
+        status = normalized_alert["status"],
+        timestamp = normalized_alert["timestamp"],
+        incident_id = normalized_alert["incident_id"]
+    )
     
     db.add(db_alert)
     db.commit()
@@ -78,10 +95,11 @@ def solarwinds_webhook(
     
     return {
         "message": "SolarWinds alert received",
-        "alert_id": db_alert.id
+        "alert_id": db_alert.id,
+        "incident_id": related_incident.id
     }
-
-
+    
+    
 @router.get("/alerts", response_model = list[AlertResponse])
 def get_alerts(
     db: Session = Depends(get_db),
