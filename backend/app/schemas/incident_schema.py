@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
-class IncidentBase(BaseModel):
+class IncidentResponse(BaseModel):
     id: int
     title: str
     severity: str
@@ -10,3 +10,6 @@ class IncidentBase(BaseModel):
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
+    
+class IncidentUpdate(BaseModel):
+    status: str

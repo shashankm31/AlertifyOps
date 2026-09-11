@@ -7,6 +7,7 @@ class Alert(Base):
     __tablename__ = "alerts"
     
     id = Column(Integer, primary_key = True)
+    event_id = Column(String, unique = True, nullable = False)
     
     device = Column(String, nullable = False)     #Router-01
     source = Column(String, nullable = False)     #SolarWinds
@@ -15,4 +16,5 @@ class Alert(Base):
     message = Column(String, nullable = False)    #GigabitEthernet0/1 is down
     status = Column(String, nullable = False)     #Open
     timestamp = Column(DateTime, nullable = False)  #When alert occurred
-    incident_id = Column(Integer, ForeignKey("incidents.id"), nullable=True)  #Foreign key to incidents table
+    incident_id = Column(Integer, ForeignKey("incidents.id"), nullable=True)  #Foreign key to incidents table 
+    

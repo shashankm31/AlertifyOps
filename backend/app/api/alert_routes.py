@@ -9,6 +9,8 @@ from app.integrations.solarwinds import normalize_solarwinds_alert
 from app.services.alert_deduplication import is_duplicate
 from app.services.alert_correlation import find_related_incident
 from app.models.incident_model import Incident
+from app.schemas.incident_schema import IncidentUpdate
+
 
 router = APIRouter()
 
@@ -45,9 +47,7 @@ def solarwinds_webhook(
     
     #2. Check for duplicate alert
     existing_alert = db.query(Alert).filter(
-        Alert.device == normalized_alert["device"],
-        Alert.alert_type == normalized_alert["alert_type"],
-        Alert.status == normalized_alert["status"]
+        Alert.event_id == normalized_alert['event_id']
     ).first()
     
     if existing_alert:
@@ -79,6 +79,7 @@ def solarwinds_webhook(
     
     #6. Save the alert
     db_alert = Alert(
+        event_id = normalized_alert["event_id"],
         source = normalized_alert["source"],
         device = normalized_alert["device"],
         alert_type = normalized_alert["alert_type"],
@@ -144,3 +145,26 @@ def delete_alert(
     
     return {"message": "Alert deleted successfully"}
 
+@router.put("/incidents/{incident_id}")
+def update_incident(
+    incident_id: int,
+    incident: IncidentUpdate,
+    db: Session = Depends(get_db)
+):
+    db_incident = db.query(Incident).filter(Incident.id == incident_id).first()
+    
+    if db_incident is None:
+        return {
+            "message": "Incident not found"
+        }
+        
+    db_incident.status = incident.status
+    
+    db.commit()
+    db.refresh(db_incident)
+    
+    return {
+        "message": "Incident updated successfully",
+        "incident_id": db_incident.id,
+        "status": db_incident.status
+    }

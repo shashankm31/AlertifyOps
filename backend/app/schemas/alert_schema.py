@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 class AlertCreate(BaseModel):
+    event_id: str
     source: str
     device: str
     status: str
@@ -14,6 +15,7 @@ class AlertCreate(BaseModel):
     
 class AlertResponse(BaseModel):
     id: int
+    event_id: str
     device: str
     status: str
     alert_type: str
