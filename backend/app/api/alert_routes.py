@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.schemas.alert_schema import AlertCreate, AlertResponse
@@ -10,6 +10,7 @@ from app.services.alert_deduplication import is_duplicate
 from app.services.alert_correlation import find_related_incident
 from app.models.incident_model import Incident
 from app.schemas.incident_schema import IncidentUpdate
+from app.services.retry_handler import retry_operation
 
 
 router = APIRouter()
@@ -42,26 +43,27 @@ def solarwinds_webhook(
     db: Session = Depends(get_db)
 ):
     
-    # 1. Normalize Solarwinds alert
-    normalized_alert = normalize_solarwinds_alert(payload)
+    try:
+         # 1. Normalize Solarwinds alert
+        normalized_alert = normalize_solarwinds_alert(payload)
     
-    #2. Check for duplicate alert
-    existing_alert = db.query(Alert).filter(
+        #2. Check for duplicate alert
+        existing_alert = db.query(Alert).filter(
         Alert.event_id == normalized_alert['event_id']
     ).first()
     
-    if existing_alert:
+        if existing_alert:
             return {
                 "message": "Duplicate alert detected",
                 "alert_id": existing_alert.id 
             }
     
-    #3. Find an existing open incident for this device
-    related_incident = find_related_incident(db, normalized_alert)
+        #3. Find an existing open incident for this device
+        related_incident = find_related_incident(db, normalized_alert)
     
-    #4. Create a new incident if none exists
-    if not related_incident:
-        new_incident = Incident(
+        #4. Create a new incident if none exists
+        if not related_incident:
+            new_incident = Incident(
             title = f"{normalized_alert['device']} issue",
             severity = normalized_alert["severity"],
             status = "Open",
@@ -69,16 +71,16 @@ def solarwinds_webhook(
             created_at = normalized_alert["timestamp"]
         )
         db.add(new_incident)
-        db.commit()
+        retry_operation(lambda: db.commit())
         db.refresh(new_incident)
         
         related_incident = new_incident
         
-    #5. Connect the alert to the incident
-    normalized_alert["incident_id"] = related_incident.id
+        #5. Connect the alert to the incident
+        normalized_alert["incident_id"] = related_incident.id
     
-    #6. Save the alert
-    db_alert = Alert(
+        #6. Save the alert
+        db_alert = Alert(
         event_id = normalized_alert["event_id"],
         source = normalized_alert["source"],
         device = normalized_alert["device"],
@@ -90,15 +92,25 @@ def solarwinds_webhook(
         incident_id = normalized_alert["incident_id"]
     )
     
-    db.add(db_alert)
-    db.commit()
-    db.refresh(db_alert)
+        db.add(db_alert)
+        db.commit()
+        db.refresh(db_alert)
     
-    return {
-        "message": "SolarWinds alert received",
-        "alert_id": db_alert.id,
-        "incident_id": related_incident.id
-    }
+        return {
+            "message": "SolarWinds alert received",
+            "alert_id": db_alert.id,
+            "incident_id": related_incident.id
+        }
+        
+    except Exception as e:
+        #Roll back any failed database transaction
+        db.rollback()
+        
+        raise HTTPException(
+            status_code = 500,
+            detail = "Failed to process Solarwinds alert"
+        )
+        
     
     
 @router.get("/alerts", response_model = list[AlertResponse])
