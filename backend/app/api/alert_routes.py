@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from app.schemas.alert_schema import AlertCreate, AlertResponse
@@ -11,6 +11,7 @@ from app.services.alert_correlation import find_related_incident
 from app.models.incident_model import Incident
 from app.schemas.incident_schema import IncidentUpdate
 from app.services.retry_handler import retry_operation
+from app.services.background_tasks import process_alert_background
 
 
 router = APIRouter()
@@ -40,6 +41,7 @@ def create_alert(
 @router.post("/integrations/solarwinds")
 def solarwinds_webhook(
     payload: dict,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db)
 ):
     
@@ -93,8 +95,11 @@ def solarwinds_webhook(
     )
     
         db.add(db_alert)
-        db.commit()
+        retry_operation(lambda:
+        db.commit())
         db.refresh(db_alert)
+        
+        background_tasks.add_task(process_alert_background)
     
         return {
             "message": "SolarWinds alert received",
@@ -103,6 +108,8 @@ def solarwinds_webhook(
         }
         
     except Exception as e:
+        print("ERROR:", e)
+        
         #Roll back any failed database transaction
         db.rollback()
         
