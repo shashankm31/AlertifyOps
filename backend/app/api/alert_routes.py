@@ -12,6 +12,7 @@ from app.models.incident_model import Incident
 from app.schemas.incident_schema import IncidentUpdate
 from app.services.retry_handler import retry_operation
 from app.services.background_tasks import process_alert_background
+from app.integrations.alert_normalizer import normalize_alert
 
 
 router = APIRouter()
@@ -47,7 +48,16 @@ def solarwinds_webhook(
     
     try:
          # 1. Normalize Solarwinds alert
-        normalized_alert = normalize_solarwinds_alert(payload)
+        normalized_alert = normalize_alert(
+            event_id = payload["event_id"],
+            source = "SolarWinds",
+            device = payload["device"],
+            alert_type = payload["alert_type"],
+            severity = payload["severity"],
+            message = payload["message"],
+            status = payload.get("status", "Open"),
+            timestamp = payload["timestamp"]
+        )
     
         #2. Check for duplicate alert
         existing_alert = db.query(Alert).filter(
