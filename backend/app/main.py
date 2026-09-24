@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.alert_routes import router
 from app.api.auth_routes import router as auth_router
 from app.api.cloudwatch_routes import router as cloudwatch_router
@@ -13,6 +14,15 @@ from app.models.incident_model import Incident
     
 # Create FastAPI appliocation   
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    
+allow_origins = ["http://localhost:5173", "http://127.0.0.1:5173"],
+allow_credentials = True,
+allow_methods = ["*"],
+allow_headers = ["*"],
+)
 
 Base.metadata.create_all(bind = engine)
 
