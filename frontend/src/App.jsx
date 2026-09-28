@@ -11,6 +11,7 @@ import Incidents from "./pages/Incidents";
 import AIInsights from "./pages/AIInsights";
 import MTTRAnalytics from "./pages/MTTRAnalytics";
 import Settings from "./pages/Settings";
+import Login from "./pages/Login";
 
 
 function App() {
@@ -23,8 +24,15 @@ function App() {
          <Navbar />
 
         <Routes>
-          <Route path = "/" 
+
+          <Route 
+           path = "/" 
            element = {<Dashboard />} 
+           />
+
+          <Route 
+            path = "/login"
+            element = {<Login />}
            />
 
           <Route 

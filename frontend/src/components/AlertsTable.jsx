@@ -1,34 +1,5 @@
-function AlertsTable() {
-    const alerts = [
-        {
-            id: 1,
-            device: "RTR-01",
-            alert: "Node Down",
-            severity: "Critical",
-            status: "Validation",
-        },
-        {
-            id: 2,
-            device: "SW-02",
-            alert: "Interface Down",
-            severity: "Warning",
-            status: "Suppressed",
-        },
-        {
-            id: 3,
-            device: "FW-01",
-            alert: "CPU High",
-            severity: "Critical",
-            status: "Incident Created",
-        },
-        {
-            id: 4,
-            device: "ESX-01",
-            alert: "Memory High",
-            severity: "Minor",
-            status: "Monitoring",
-        },
-    ];
+function AlertsTable({ alerts })
+   {
     
     return (
         <div style={{ padding: "20px" }}>
@@ -62,7 +33,7 @@ function AlertsTable() {
 
                         <tr key = {alert.id}>
                             <td style = {cellStyle}>{alert.device} </td>
-                            <td style = {cellStyle}>{alert.alert} </td>
+                            <td style = {cellStyle}>{alert.alert_type} </td>
                             <td style = {cellStyle}>{alert.severity} </td>
                             <td style = {cellStyle}>{alert.status} </td>
                         </tr>
