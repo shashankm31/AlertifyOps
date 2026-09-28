@@ -16,6 +16,7 @@ class AlertCreate(BaseModel):
 class AlertResponse(BaseModel):
     id: int
     event_id: str
+    source: str 
     device: str
     status: str
     alert_type: str

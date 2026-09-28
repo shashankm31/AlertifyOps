@@ -22,6 +22,7 @@ function AlertsTable({ alerts })
                 >
                     <tr>
                         <th style = {cellStyle} > Device </th>
+                        <th style = {cellStyle} > Source </th> 
                         <th style = {cellStyle} > Alert </th>
                         <th style = {cellStyle} > Severity </th>
                         <th style = {cellStyle} > Status </th>
@@ -33,6 +34,7 @@ function AlertsTable({ alerts })
 
                         <tr key = {alert.id}>
                             <td style = {cellStyle}>{alert.device} </td>
+                            <td style = {cellStyle}>{alert.source} </td>
                             <td style = {cellStyle}>{alert.alert_type} </td>
                             <td style = {cellStyle}>{alert.severity} </td>
                             <td style = {cellStyle}>{alert.status} </td>
