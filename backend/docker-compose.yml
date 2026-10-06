@@ -1,0 +1,21 @@
+services:                                        #services: -> defines containes/services
+  backend:                                          
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: alertifyops
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: alertify123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:                                   #volumes: -> defines persistent docker volumes
+  postgres_data:
+    external: true
+    name: 9ca1d39af8e9380dea1cdfb0fa56344392c3c7e7b310399e3a927f0e2a85b0ce
